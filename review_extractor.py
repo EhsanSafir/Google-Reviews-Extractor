@@ -6,6 +6,7 @@ from selenium.common import ElementNotInteractableException, ElementClickInterce
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
+from utils import clean_rated_value
 
 
 class SelectorRepo:
@@ -76,7 +77,7 @@ class GoogleReviewExtractor:
             for _ in range(self._reviewer_count):
                 element.click()
                 time.sleep(1)
-                print(f"[x] Data triggered for page {_}")
+                print(f"\t[x] Data triggered for page {_}")
         except (ElementNotInteractableException, ElementClickInterceptedException):
             pass
         finally:
@@ -96,6 +97,7 @@ class GoogleReviewExtractor:
             reviewer = review.find_element(*self._selector_repo.REVIEW_CARD_REVIEWER).text
             review_rate = review.find_element(*self._selector_repo.REVIEW_CARD_RATE).get_attribute('aria-label')
             review_text = review.find_element(*self._selector_repo.REVIEW_CARD_TEXT).text
+            review_rate = clean_rated_value(review_rate)
             self._extracted_reviews.append(
                 {'reviewer': reviewer, 'reviewer_rate': review_rate, 'review_text': review_text})
         print(f"[x] Data Structure Created")
