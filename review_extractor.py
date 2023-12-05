@@ -2,7 +2,7 @@ import time
 
 from openpyxl import Workbook
 from selenium import webdriver
-from selenium.common import ElementNotInteractableException, ElementClickInterceptedException
+from selenium.common import ElementNotInteractableException, ElementClickInterceptedException, NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
@@ -29,12 +29,18 @@ class GoogleReviewExtractor:
         self._extracted_reviews = []
         self._excel_header = ['reviewer', 'reviewer_rate', 'review_text', 'review_images']
 
+    def _show_full_review_text(self):
+        js_script = ("document.querySelectorAll('.review-full-text, .k8MTF').forEach(element => { "
+                     "element.style.display = 'block' });")
+        self._driver.execute_script(js_script)
+
     def start_scrapping(self):
         try:
             self._start_web_driver()
             self._driver.get(self._review_full_url)
             self._select_review_tab()
             self._data_trigger()
+            self._show_full_review_text()
             all_reviews = self._get_reviews()
             self._create_data_structure(all_reviews)
             self._export_as_excel_file()
@@ -96,7 +102,10 @@ class GoogleReviewExtractor:
         for review in all_reviews:
             reviewer = review.find_element(*self._selector_repo.REVIEW_CARD_REVIEWER).text
             review_rate = review.find_element(*self._selector_repo.REVIEW_CARD_RATE).get_attribute('aria-label')
-            review_text = review.find_element(*self._selector_repo.REVIEW_CARD_TEXT).text
+            try:
+                review_text = review.find_element(*self._selector_repo.REVIEW_CARD_TEXT).text
+            except NoSuchElementException:
+                review_text = ''
             review_rate = clean_rated_value(review_rate)
             review_images = [extract_url_from_style(item.get_attribute('style')) for item in
                              review.find_elements(*self._selector_repo.REVIEW_PHOTOS)]
