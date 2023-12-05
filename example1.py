@@ -1,4 +1,4 @@
-from extractor import GoogleReviewExtractor
+from review_extractor import GoogleReviewExtractor
 
 if __name__ == '__main__':
     url = ('https://www.google.com/search?q=Mac+Donalds+in+Haburg&oq=Mac+Donalds+in+Haburg&gs_lcrp'

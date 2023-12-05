@@ -1,11 +1,11 @@
 import time
 
+from openpyxl import Workbook
+from selenium import webdriver
 from selenium.common import ElementNotInteractableException, ElementClickInterceptedException
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.wait import WebDriverWait
-from selenium import webdriver
 from selenium.webdriver.support import expected_conditions as EC
-from openpyxl import Workbook
+from selenium.webdriver.support.wait import WebDriverWait
 
 
 class SelectorRepo:
@@ -27,6 +27,19 @@ class GoogleReviewExtractor:
         self._selector_repo = SelectorRepo
         self._extracted_reviews = []
         self._excel_header = ['reviewer', 'reviewer_rate', 'review_text']
+
+    def start_scrapping(self):
+        try:
+            self._start_web_driver()
+            self._driver.get(self._review_full_url)
+            self._select_review_tab()
+            self._data_trigger()
+            all_reviews = self._get_reviews()
+            self._create_data_structure(all_reviews)
+            self._export_as_excel_file()
+        finally:
+            if self._driver:
+                self._driver.quit()
 
     def _setup_driver(self):
         driver = webdriver.Chrome()
@@ -102,16 +115,3 @@ class GoogleReviewExtractor:
 
     def get_extracted_reviews(self):
         return self._extracted_reviews
-
-    def start_scrapping(self):
-        try:
-            self._start_web_driver()
-            self._driver.get(self._review_full_url)
-            self._select_review_tab()
-            self._data_trigger()
-            all_reviews = self._get_reviews()
-            self._create_data_structure(all_reviews)
-            self._export_as_excel_file()
-        finally:
-            if self._driver:
-                self._driver.quit()
