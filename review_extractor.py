@@ -14,8 +14,8 @@ class SelectorRepo:
     REVIEW_TAB = (By.LINK_TEXT, 'Reviews')
     REVIEW_CARD = (By.CLASS_NAME, 'gws-localreviews__google-review')
     REVIEW_CARD_REVIEWER = (By.CSS_SELECTOR, '.TSUbDb a')
-    REVIEW_CARD_RATE = (By.CSS_SELECTOR, '.z3HNkc')
-    REVIEW_CARD_TEXT = (By.CSS_SELECTOR, '.Jtu6Td span')
+    REVIEW_CARD_RATE = (By.CSS_SELECTOR, '[aria-label^="Rated "]')
+    REVIEW_CARD_TEXT = (By.CSS_SELECTOR, 'span[data-expandable-section]')
     REVIEW_DATA_FETCHER = (By.CSS_SELECTOR, 'div[data-async-context][data-async-trigger]')
     REVIEW_PHOTOS = (By.CSS_SELECTOR, 'div[aria-label="Photos"]')
 
