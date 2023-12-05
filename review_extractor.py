@@ -6,18 +6,18 @@ from selenium.common import ElementNotInteractableException, ElementClickInterce
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
-from utils import clean_rated_value
+from utils import clean_rated_value, extract_url_from_style
 
 
 class SelectorRepo:
     REVIEW_FORM = (By.CLASS_NAME, 'AVvGRc')
     REVIEW_TAB = (By.LINK_TEXT, 'Reviews')
-    REVIEW_CARD = (By.CLASS_NAME, 'jxjCjc')
+    REVIEW_CARD = (By.CLASS_NAME, 'gws-localreviews__google-review')
     REVIEW_CARD_REVIEWER = (By.CSS_SELECTOR, '.TSUbDb a')
     REVIEW_CARD_RATE = (By.CSS_SELECTOR, '.z3HNkc')
     REVIEW_CARD_TEXT = (By.CSS_SELECTOR, '.Jtu6Td span')
-    REVIEW_CARD_IMAGES = (By.CLASS_NAME, 'JrO5Xe')
     REVIEW_DATA_FETCHER = (By.CSS_SELECTOR, 'div[data-async-context][data-async-trigger]')
+    REVIEW_PHOTOS = (By.CSS_SELECTOR, 'div[aria-label="Photos"]')
 
 
 class GoogleReviewExtractor:
@@ -27,7 +27,7 @@ class GoogleReviewExtractor:
         self._review_full_url = review_full_url
         self._selector_repo = SelectorRepo
         self._extracted_reviews = []
-        self._excel_header = ['reviewer', 'reviewer_rate', 'review_text']
+        self._excel_header = ['reviewer', 'reviewer_rate', 'review_text', 'review_images']
 
     def start_scrapping(self):
         try:
@@ -98,8 +98,12 @@ class GoogleReviewExtractor:
             review_rate = review.find_element(*self._selector_repo.REVIEW_CARD_RATE).get_attribute('aria-label')
             review_text = review.find_element(*self._selector_repo.REVIEW_CARD_TEXT).text
             review_rate = clean_rated_value(review_rate)
+            review_images = [extract_url_from_style(item.get_attribute('style')) for item in
+                             review.find_elements(*self._selector_repo.REVIEW_PHOTOS)]
+            review_images = ' || '.join(review_images)
             self._extracted_reviews.append(
-                {'reviewer': reviewer, 'reviewer_rate': review_rate, 'review_text': review_text})
+                {'reviewer': reviewer, 'reviewer_rate': review_rate, 'review_text': review_text,
+                 'review_images': review_images})
         print(f"[x] Data Structure Created")
 
     def _export_as_excel_file(self):

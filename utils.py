@@ -1,6 +1,11 @@
 import re
 
 
+def extract_url_from_style(value):
+    match = re.search(r'url\("(.*?)"\)', value)
+    return match.group(1) if match else value
+
+
 def convert_arabic_number_to_english(input_string):
     persian_to_english_mapping = {
         '۰': '0',
