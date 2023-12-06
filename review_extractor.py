@@ -6,7 +6,7 @@ from selenium.common import ElementNotInteractableException, ElementClickInterce
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
-from utils import clean_rated_value, extract_url_from_style
+from utils import clean_rated_value, extract_url_from_style, generate_file_name_base_on_url
 
 
 class SelectorRepo:
@@ -21,9 +21,9 @@ class SelectorRepo:
 
 
 class GoogleReviewExtractor:
-    def __init__(self, review_full_url, reviewer_count=10 ** 12, timeout=120):
+    def __init__(self, review_full_url, pagination_request_count=130, timeout=120):
         self._timeout = timeout
-        self._reviewer_count = reviewer_count
+        self._pagination_request_count = pagination_request_count
         self._review_full_url = review_full_url
         self._selector_repo = SelectorRepo
         self._extracted_reviews = []
@@ -80,9 +80,9 @@ class GoogleReviewExtractor:
                 EC.element_to_be_clickable(self._selector_repo.REVIEW_DATA_FETCHER)
             )
             print("[x] Data trigger found")
-            for _ in range(self._reviewer_count):
+            for _ in range(self._pagination_request_count):
                 element.click()
-                time.sleep(1)
+                time.sleep(2)
                 print(f"\t[x] Data triggered for page {_}")
         except (ElementNotInteractableException, ElementClickInterceptedException):
             pass
@@ -124,7 +124,7 @@ class GoogleReviewExtractor:
             row_values = [row_data[field] for field in self._excel_header]
             ws.append(row_values)
 
-        excel_file_path = f"reviews.xlsx"
+        excel_file_path = f"{generate_file_name_base_on_url(self._review_full_url)}.xlsx"
         wb.save(excel_file_path)
         print(f"[x] Excel File created")
 
